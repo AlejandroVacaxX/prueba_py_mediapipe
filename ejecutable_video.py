@@ -3,17 +3,12 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
+from mediapipe.framework.formats import landmark_pb2
 
-
-# Importamos explícitamente las soluciones para forzar a Python a cargarlas
-from mediapipe.solutions import drawing_utils
-from mediapipe.solutions import drawing_styles
-from mediapipe.solutions import face_mesh
-
-# Configuración de variables (opcional, si las usabas con 'mp.')
-mp_drawing = drawing_utils
-mp_face_mesh = face_mesh
-mp.framework.formats.landmark_pb2 # <--- Agrega este import arriba
+# Acceder a solutions via mp.solutions (funciona en 0.10.x)
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_face_mesh = mp.solutions.face_mesh
 
 # --- 1. CONFIGURACIÓN DEL MODELO ---
 # Asegúrate de que 'face_landmarker.task' esté en la carpeta
@@ -47,23 +42,21 @@ def draw_landmarks_on_image(rgb_image, detection_result):
             for landmark in face_landmarks
         ])
 
-        # --- ARREGLO 2: Ruta Correcta (mp.solutions en vez de mp.python.solutions) ---
-        
         # Dibujar malla facial
-        drawing_utils.draw_landmarks(
+        mp_drawing.draw_landmarks(
             image=annotated_image,
             landmark_list=face_landmarks_proto,
-            connections=mp.solutions.face_mesh.FACEMESH_TESSELATION, # <--- AQUÍ ESTABA EL ERROR
+            connections=mp_face_mesh.FACEMESH_TESSELATION,
             landmark_drawing_spec=None,
-            connection_drawing_spec=drawing_styles.get_default_face_mesh_tesselation_style())
+            connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
         
         # Dibujar contornos
-        drawing_utils.draw_landmarks(
+        mp_drawing.draw_landmarks(
             image=annotated_image,
             landmark_list=face_landmarks_proto,
-            connections=mp.solutions.face_mesh.FACEMESH_CONTOURS, # <--- AQUÍ TAMBIÉN
+            connections=mp_face_mesh.FACEMESH_CONTOURS,
             landmark_drawing_spec=None,
-            connection_drawing_spec=drawing_styles.get_default_face_mesh_contours_style())
+            connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_contours_style())
 
     return annotated_image
 
